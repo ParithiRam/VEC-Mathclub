@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VEC Math Club</title>
+    <link rel="icon" href="assets/mathclublogo.jpeg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom CSS for a smoother experience */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d0d0d;
+            color: #d1d5db; /* A light grey for text */
+            cursor: none; /* Hide default cursor */
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+        
+        /* Custom scrollbar for aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #111;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background-color: #3b82f6; /* A nice blue color */
+            border-radius: 4px;
+        }
+
+        /* Canvas for the 3D element */
+        #hero-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        
+        /* Persistent Nav bar */
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            z-index: 50;
+            transition: all 0.3s ease-in-out;
+            transform: translateY(0);
+        }
+        .nav-visible {
+            transform: translateY(100px);
+        }
+
+        /* Custom cursor styling */
+        .cursor {
+            position: fixed;
+            z-index: 9999;
+            pointer-events: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #3b82f6;
+            transition: transform 0.2s ease-out, border-color 0.2s ease-out;
+            transform: translate(-50%, -50%);
+        }
+
+        .cursor-inner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: #3b82f6;
+            transition: transform 0.2s ease-out;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Enlarge cursor on hover of interactive elements */
+        .cursor-hover {
+            transform: translate(-50%, -50%) scale(2.5);
+            border-color: #ffffff;
+        }
+        
+        /* General content sections */
+        .section-content {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        /* Animation for team cards on hover */
+        .team-card-hover {
+            transform: scale(1.05) perspective(500px) rotateX(10deg) rotateY(-10deg);
+        }
+    </style>
+</head>
+<body class="bg-[#0d0d0d] text-gray-300">
+
+    <div class="cursor">
+        <div class="cursor-inner"></div>
+    </div>
+    
+    <nav class="nav-bar bg-black bg-opacity-50 backdrop-filter backdrop-blur-lg border-b border-gray-700 py-4 px-8 md:px-12 flex items-center justify-between">
+        <img width="30" height="30" id="about-image" src="assets\mathclublogo.jpeg" alt="Graph illustration" class="h-auto rounded-xl shadow-lg transition-transform duration-300 hover:scale-105 flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-8 justify items-center py-8">
+        <a href="#" class="text-2xl font-bold text-white z-50"> MathClub</a>
+
+        <button id="menu-toggle" class="md:hidden text-gray-400 hover:text-white focus:outline-none transition-colors z-50">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+        </button>
+        
+        <div id="nav-menu" class="hidden md:flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-8 text-lg absolute md:relative top-0 left-0 w-full h-screen md:h-auto bg-black md:bg-transparent justify-center items-center">
+            <ul class="flex flex-col md:flex-row space-y-8 md:space-y-0 md:space-x-8 text-2xl md:text-lg">
+                <li><a href="#about" class="block py-2 text-gray-300 hover:text-blue-400 transition-colors duration-300" onclick="document.getElementById('nav-menu').classList.add('hidden')">About</a></li>
+                <li><a href="#events" class="block py-2 text-gray-300 hover:text-blue-400 transition-colors duration-300" onclick="document.getElementById('nav-menu').classList.add('hidden')">Events</a></li>
+                <li><a href="#coordinators" class="block py-2 text-gray-300 hover:text-blue-400 transition-colors duration-300" onclick="document.getElementById('nav-menu').classList.add('hidden')">Coordinators</a></li>
+                <li><a href="#contact" class="block py-2 text-gray-300 hover:text-blue-400 transition-colors duration-300" onclick="document.getElementById('nav-menu').classList.add('hidden')">Contact</a></li>
+                <li><a href=https://www.linkedin.com/company/vec-mathclub class="block py-2 text-gray-300 hover:text-blue-400 transition-colors duration-300" onclick="document.getElementById('nav-menu').classList.add('hidden')">Follow us on linkedin</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="relative z-20">
+
+        <section class="relative h-screen flex flex-col justify-center items-center overflow-hidden text-center p-4">
+            <canvas id="hero-canvas" class="w-full h-full"></canvas>
+            
+            <div id="hero-content" class="relative z-20 space-y-4">
+                <h1 class="text-6xl md:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 transition-all duration-300 ease-in-out">
+                     Math Club
+                </h1>
+                <p class="text-2xl md:text-4xl font-small text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 transition-all duration-300 ease-in-out">VELAMMAL ENGINEERING COLLEGE</p>
+                <p class="text-lg md:text-xl font-medium text-gray-400">
+                    Exploring the elegance and application of mathematics.
+                </p>
+            </div>
+        </section>
+
+        <section id="about" class="min-h-screen flex items-center justify-center p-8 bg-black">
+            <div class="section-content max-w-4xl mx-auto text-center space-y-6">
+                <h2 class="text-4xl md:text-5xl font-semibold text-blue-400">About Us</h2>
+                <p class="text-lg leading-relaxed text-gray-400">
+                    The College Math Club is a dynamic community dedicated to fostering a deeper appreciation for the beauty and power of mathematics. We host workshops, seminars, and fun competitions that cover everything from abstract algebra to real-world data analysis. Our goal is to connect students with faculty and industry professionals, providing a supportive environment to explore mathematical concepts and their diverse applications.
+                </p>
+                <div class="relative flex flex-col flex-row items-center space-y-4 md:space-y-0 md:space-x-8 hover:bg-gray-800 transition-colors duration-300 justify items-center py-8">
+                    <img id="about-image" src="assets/mathclubbanner.jpg" alt="Graph illustration" class="w-full h-auto rounded-xl shadow-lg transition-transform duration-300 hover:scale-105 flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-8 justify items-center py-8">
+                     <video width="640" height="360" controls autoplay muted playsinline>
+                        <source src="assets/Maths_Club_Edit_vacmar.mp4" type="video/mp4">
+                             Your browser does not support the video tag.
+                        </video>
+                   
+                </div>
+            </div>
+        </section>
+
+        <section id="events" class="py-20 p-8">
+            <div class="max-w-6xl mx-auto space-y-12">
+                <h2 class="section-content text-4xl md:text-5xl font-semibold text-center text-blue-400 mb-12">Upcoming Events</h2>
+                
+                <div class="event-card section-content bg-gray-900 rounded-2xl p-6 md:p-10 shadow-lg flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-8 hover:bg-gray-800 transition-colors duration-300">
+                    <div class="md:w-1/4 flex-shrink-0 text-center md:text-left">
+                        <span class="text-2xl font-bold text-white">Date: TBA</span>
+                        <p class="text-lg text-gray-500">2025</p>
+                    </div>
+                    <div class="md:w-3/4">
+                        <h3 class="text-2xl md:text-3xl font-bold text-white mb-2">III Year event</h3>
+                        <p class="text-gray-400 leading-relaxed">Don't miss out on the fun and mathematical challenges! Interested students from III year can join...See you there!</p>
+                    </div>
+                </div>
+
+                <h2 class="section-content text-4xl md:text-5xl font-semibold text-center text-blue-400 mb-12">Past Events</h2>
+
+                 <div class="event-card section-content bg-gray-900 rounded-2xl p-6 md:p-10 shadow-lg flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-8 hover:bg-gray-800 transition-colors duration-300">
+                    <div class="md:w-1/4 flex-shrink-0 text-center md:text-left">
+                        <span class="text-2xl font-bold text-white">Feb 25</span>
+                        <p class="text-lg text-gray-500">2025</p>
+                    </div>
+                    <div class="md:w-3/4">
+                        <h3 class="text-2xl md:text-3xl font-bold text-white mb-2">Mathquest I year</h3>
+                        <p class="text-gray-400 leading-relaxed">Discover the secrets of secure communication. Learn about modern cryptographic techniques and their mathematical underpinnings with hands-on exercises.</p>
+                    </div>
+                </div>
+
+                <div class="event-card section-content bg-gray-900 rounded-2xl p-6 md:p-10 shadow-lg flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-8 hover:bg-gray-800 transition-colors duration-300">
+                    <div class="md:w-1/4 flex-shrink-0 text-center md:text-left">
+                        <span class="text-2xl font-bold text-white">2025</span>
+                        <p class="text-lg text-gray-500"></p>
+                    </div>
+                    <div class="md:w-3/4">
+                        <h3 class="text-2xl md:text-3xl font-bold text-white mb-2">Paper Presentation</h3>
+                        <p class="text-gray-400 leading-relaxed">Discover the secrets of secure communication. Learn about modern cryptographic techniques and their mathematical underpinnings with hands-on exercises.</p>
+                    </div>
+                </div>
+
+                 <div class="event-card section-content bg-gray-900 rounded-2xl p-6 md:p-10 shadow-lg flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-8 hover:bg-gray-800 transition-colors duration-300">
+                    <div class="md:w-1/4 flex-shrink-0 text-center md:text-left">
+                        <span class="text-2xl font-bold text-white">Sep 18</span>
+                        <p class="text-lg text-gray-500">2024</p>
+                    </div>
+                    <div class="md:w-3/4">
+                        <h3 class="text-2xl md:text-3xl font-bold text-white mb-2">Preparedness</h3>
+                        <p class="text-gray-400 leading-relaxed">Testing your logic and problem-solving skills in our puzzle competition!</p>
+                    </div>
+                </div>
+
+                <div class="event-card section-content bg-gray-900 rounded-2xl p-6 md:p-10 shadow-lg flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-8 hover:bg-gray-800 transition-colors duration-300">
+                    <div class="md:w-1/4 flex-shrink-0 text-center md:text-left">
+                        <span class="text-2xl font-bold text-white">Aug 23,24</span>
+                        <p class="text-lg text-gray-500">2024</p>
+                    </div>
+                    <div class="md:w-3/4">
+                        <h3 class="text-2xl md:text-3xl font-bold text-white mb-2">Mathmania</h3>
+                        <p class="text-gray-400 leading-relaxed">Testing your logic and problem-solving skills in our puzzle competition!</p>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+
+        <section id="coordinators" class="py-20 p-8">
+            <div class="max-w-6xl mx-auto text-center">
+                <h2 class="section-content text-4xl md:text-5xl font-semibold text-blue-400 mb-12">Club Coordinators</h2>
+                <div class="section-content grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="team-card bg-gray-900 rounded-2xl p-6 flex flex-col items-center space-y-4 transition-transform duration-300 transform perspective-1000">
+                        <img src="https://placehold.co/150x150/2d3748/d1d5db?text=NISSI" alt="KUPPULAKSHMI" class="rounded-full w-36 h-36 border-4 border-blue-500 shadow-md">
+                        <div class="text-center">
+                            <h3 class="text-xl font-bold text-white">Dr. Kuppulakshmi V</h3>
+                            <p class="text-blue-400">Staff Coordinator I</p>
+                            <p class="text-sm text-gray-500 mt-2">Asst. Professor</p>
+                        </div>
+                    </div>
+                    <div class="team-card bg-gray-900 rounded-2xl p-6 flex flex-col items-center space-y-4 transition-transform duration-300 transform perspective-1000">
+                        <img src="https://placehold.co/150x150/2d3748/d1d5db?text=NISSI" alt="NISSI GRACE" class="rounded-full w-36 h-36 border-4 border-blue-500 shadow-md">
+                        <div class="text-center">
+                            <h3 class="text-xl font-bold text-white">Ms Hema C</h3>
+                            <p class="text-blue-400">Staff Coordinator II</p>
+                            <p class="text-sm text-gray-500 mt-2">Asst. Professor</p>
+                        </div>
+                    </div>
+                    <div class="team-card bg-gray-900 rounded-2xl p-6 flex flex-col items-center space-y-4 transition-transform duration-300 transform perspective-1000">
+                        <img src="https://placehold.co/150x150/2d3748/d1d5db?text=NISSI" alt="NISSI GRACE" class="rounded-full w-36 h-36 border-4 border-blue-500 shadow-md">
+                        <div class="text-center">
+                            <h3 class="text-xl font-bold text-white">Nissi Grace F</h3>
+                            <p class="text-blue-400">Chairperson</p>
+                            <p class="text-sm text-gray-500 mt-2">IV - Mechanical</p>
+                        </div>
+                    </div>
+                    <div class="team-card bg-gray-900 rounded-2xl p-6 flex flex-col items-center space-y-4 transition-transform duration-300 transform perspective-1000">
+                        <img src="https://placehold.co/150x150/2d3748/d1d5db?text=NISHA" alt="Nisha" class="rounded-full w-36 h-36 border-4 border-purple-500 shadow-md">
+                        <div class="text-center">
+                            <h3 class="text-xl font-bold text-white">Nisha K G</h3>
+                            <p class="text-purple-400">Secretary</p>
+                            <p class="text-sm text-gray-500 mt-2">IV - Mechanical</p>
+                        </div>
+                    </div>
+                    <div class="team-card bg-gray-900 rounded-2xl p-6 flex flex-col items-center space-y-4 transition-transform duration-300 transform perspective-1000">
+                        <img src="https://placehold.co/150x150/2d3748/d1d5db?text=PARITHI" alt="David Lee" class="rounded-full w-36 h-36 border-4 border-teal-500 shadow-md">
+                        <div class="text-center">
+                            <h3 class="text-xl font-bold text-white">Parithi Ram S</h3>
+                            <p class="text-teal-400">Treasurer/Developer</p>
+                            <p class="text-sm text-gray-500 mt-2">IV - ECE</p>
+                        </div>
+                    </div>
+                    <div class="team-card bg-gray-900 rounded-2xl p-6 flex flex-col items-center space-y-4 transition-transform duration-300 transform perspective-1000">
+                        <img src="https://placehold.co/150x150/2d3748/d1d5db?text=PARITHI" alt="David Lee" class="rounded-full w-36 h-36 border-4 border-teal-500 shadow-md">
+                        <div class="text-center">
+                            <h3 class="text-xl font-bold text-white">Srinivasan V</h3>
+                            <p class="text-teal-400">Event coordinator</p>
+                            <p class="text-sm text-gray-500 mt-2">IV - ECE</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="py-20 p-8">
+            <div class="section-content max-w-4xl mx-auto text-center space-y-8">
+                <h2 class="text-4xl md:text-5xl font-semibold text-center text-blue-400">Contact Us</h2>
+                <p class="text-lg text-gray-400 leading-relaxed">
+                    Have questions about our club, events, or anything else? Fill out the form below and we'll get back to you.
+                </p>
+                <form class="space-y-6 text-left" action="https://api.web3forms.com/submit" method="POST" method="POST">
+                <input type="hidden" name="access_key" value="ee224a6c-b89f-47b7-8c49-f5fafda82e9f">
+
+                    
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-300">Name</label>
+                        <div class="mt-1">
+                            <input type="text" name="name" id="name" required
+                                class="block w-full rounded-md border-gray-700 bg-gray-900 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-3 transition-colors duration-200">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-300">Email</label>
+                        <div class="mt-1">
+                            <input type="email" name="email" id="email" required
+                                class="block w-full rounded-md border-gray-700 bg-gray-900 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-3 transition-colors duration-200">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-gray-300">Message</label>
+                        <div class="mt-1">
+                            <textarea id="message" name="message" rows="4" required
+                                class="block w-full rounded-md border-gray-700 bg-gray-900 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-3 transition-colors duration-200"></textarea>
+                        </div>
+                    </div>
+                    <div class="pt-4">
+                        <button type="submit"
+                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                            Send Message
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <footer class="bg-black py-10 text-center text-gray-500">
+            <div class="max-w-6xl mx-auto">
+                <p>&copy; 2025 Parithi Ram S. All Rights Reserved.</p>
+                <p class="mt-2">For inquiries, contact: <a href="mailto:parithiram2005@gmail.com" class="hover:text-blue-400 transition-colors duration-200">parithiram2005@gmail.com</a></p>
+            </div>
+        </footer>
+
+    </main>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/MotionPathPlugin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/postprocessing.min.js"></script>
+
+    <script>
+        // --- Core Application Logic ---
+        
+        // Ensure all scripts are loaded before running the main logic
+        window.onload = function() {
+            // Register GSAP plugins
+            gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
+            
+            // -----------------------------
+            // 1. Custom Cursor Functionality
+            // -----------------------------
+            const cursor = document.querySelector('.cursor');
+            const interactiveElements = document.querySelectorAll('a, button, .team-card, .event-card, img');
+
+            // Listen for mouse movement on the entire page
+            document.addEventListener('mousemove', e => {
+                // Use GSAP to smoothly move the cursor element
+                gsap.to(cursor, {
+                    x: e.clientX,
+                    y: e.clientY,
+                    duration: 0.1,
+                    ease: "power2.out"
+                });
+            });
+
+            // Loop through interactive elements to add hover effects
+            interactiveElements.forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    cursor.classList.add('cursor-hover');
+                });
+                el.addEventListener('mouseleave', () => {
+                    cursor.classList.remove('cursor-hover');
+                });
+            });
+
+            // --------------------------------
+            // 2. Three.js 3D Floating Scene
+            // --------------------------------
+            
+            const canvas = document.getElementById('hero-canvas');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            // Icosahedron with flat shading
+            const geometry = new THREE.IcosahedronGeometry(2, 1);
+            const material = new THREE.MeshPhysicalMaterial({ 
+                color: 0x3b82f6,
+                roughness: 0.2,
+                metalness: 0.5,
+                transmission: 0.9,
+                transparent: true,
+                flatShading: true
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
+            
+            // Wireframe
+            const wireframe = new THREE.LineSegments(
+                new THREE.WireframeGeometry(geometry),
+                new THREE.LineBasicMaterial({ color: 0x93c5fd, transparent: true, opacity: 0.5 })
+            );
+            mesh.add(wireframe);
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(5, 5, 5).normalize();
+            scene.add(directionalLight);
+            
+            // Animation loop
+            const animate = () => {
+                requestAnimationFrame(animate);
+
+                // Mouse interaction with GSAP for smoother movement
+                gsap.to(mesh.rotation, {
+                    x: -mouse.y * 0.5,
+                    y: mouse.x * 0.5,
+                    duration: 1,
+                    ease: "power2.out"
+                });
+                
+                // Continuous floating animation
+                mesh.position.y = Math.sin(Date.now() * 0.001) * 0.2;
+                mesh.rotation.z += 0.001;
+
+                renderer.render(scene, camera);
+            };
+
+            const mouse = { x: 0, y: 0 };
+            document.addEventListener('mousemove', (e) => {
+                mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            });
+            
+            animate();
+
+            // --------------------------------
+            // 3. GSAP ScrollTrigger Animations
+            // --------------------------------
+            
+            // Parallax effect on hero content and 3D object
+            gsap.to('#hero-content', {
+                y: 100, // Move down slightly
+                opacity: 0,
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: 'body',
+                    start: 'top top',
+                    end: 'bottom bottom',
+                    scrub: true
+                }
+            });
+            
+            gsap.to(mesh.position, {
+                z: 10, // Move 3D object away
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: 'body',
+                    start: 'top top',
+                    end: 'bottom bottom',
+                    scrub: true
+                }
+            });
+
+            // Animate nav bar on scroll
+            gsap.to('.nav-bar', {
+                y: -100, // Move the nav bar up and off-screen
+                ease: 'power2.out',
+                duration: 0.5,
+                scrollTrigger: {
+                    trigger: 'body',
+                    start: 'top -20%', // The scroll point at which the navbar disappears
+                    toggleActions: 'play none none reverse' // Play when scrolling down, reverse when scrolling up
+                }
+            });
+
+            // Animate icosahedron transparency on scroll
+            gsap.to(mesh.material, {
+                opacity: 0, // Target opacity is 0 (fully transparent)
+                ease: 'power1.out',
+                scrollTrigger: {
+                    trigger: '#about', // The section that triggers the animation
+                    start: 'top bottom', // When the top of the #about section hits the bottom of the viewport
+                    end: 'top 50%', // Animation ends when the top of #about is 50% from the top
+                    scrub: true // Link the animation to the scroll position
+                }
+            });
+
+
+            // Animate section content and headings
+            gsap.utils.toArray('.section-content').forEach(section => {
+                gsap.fromTo(section, { opacity: 0, y: 50 }, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 1,
+                    ease: 'power2.out',
+                    stagger: 0.2,
+                    scrollTrigger: {
+                        trigger: section,
+                        start: 'top 80%',
+                        toggleActions: 'play none none reverse'
+                    }
+                });
+            });
+
+            // Animate about image
+            gsap.to('#about-image', {
+                scale: 0.9,
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: '#about-image',
+                    start: 'top bottom',
+                    end: 'bottom top',
+                    scrub: true
+                }
+            });
+            
+            // --------------------------------
+            // 4. Team Card 3D Hover Effect
+            // --------------------------------
+            
+            gsap.set('.team-card', { transformOrigin: 'center center' });
+            
+            gsap.utils.toArray('.team-card').forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left - rect.width / 2;
+                    const y = e.clientY - rect.top - rect.height / 2;
+
+                    const rotationY = gsap.utils.mapRange(-rect.width/2, rect.width/2, -10, 10, x);
+                    const rotationX = gsap.utils.mapRange(-rect.height/2, rect.height/2, 10, -10, y);
+                    
+                    gsap.to(card, {
+                        duration: 0.3,
+                        rotationX: rotationX,
+                        rotationY: rotationY,
+                        ease: 'power1.out'
+                    });
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    gsap.to(card, {
+                        duration: 0.5,
+                        rotationX: 0,
+                        rotationY: 0,
+                        scale: 1,
+                        ease: 'elastic.out(1, 0.3)'
+                    });
+                });
+            });
+
+            // -----------------------------
+            // 5. Mobile Navigation Toggle
+            // -----------------------------
+            const menuToggle = document.getElementById('menu-toggle');
+            const navMenu = document.getElementById('nav-menu');
+
+            menuToggle.addEventListener('click', () => {
+                navMenu.classList.toggle('hidden');
+                navMenu.classList.toggle('flex');
+            });
+
+        };
+    </script>
+</body>
+</html>
